@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f1461b18-cd10-4824-8afe-3cf2c45694cd" >
 		<http:listener-connection host="0.0.0.0" port="${http.port}" />
 	</http:listener-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="e3ecafb3-4df1-46a2-8442-3f29110c0d59" >
-		<db:my-sql-connection host="${db.mySql.host}" port="${db.mySql.port}" user="${db.mySql.user}" password="${db.mySql.password}" />
+		<db:my-sql-connection host="${db.mySql.host}" port="${db.mySql.port}" user="${db.mySql.user}" password="${secure::db.mySql.password}" />
 	</db:config>
-	<configuration-properties doc:name="Configuration properties" doc:id="7ce50c20-7ea2-44eb-991b-5badb2d32b50" file="config\dev.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="7ce50c20-7ea2-44eb-991b-5badb2d32b50" file="config\\${env}.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="da13e3e6-3712-4711-b664-cb56c5c491af" file="config\\${env}.yaml" key="123" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
 	<flow name="mule-securing-propertyFlow" doc:id="1b641e16-2056-4199-93db-ee6ef8c586e4" >
-		<http:listener doc:name="GET /user" doc:id="00338fe9-427e-4830-9074-39ec625a551a" config-ref="HTTP_Listener_config" path="/users" allowedMethods="GET"/>
+		<http:listener doc:name="GET /user" doc:id="00338fe9-427e-4830-9074-39ec625a551a" config-ref="HTTP_Listener_config" path="/${http.path}" allowedMethods="GET"/>
 		<db:select doc:name="Select All Customers" doc:id="5d253f9e-4fc8-4ed2-be0c-895828799d66" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT * FROM classicmodels.customers]]></db:sql>
 		</db:select>
@@ -23,7 +27,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+p('secure::db.mySql.password')]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>

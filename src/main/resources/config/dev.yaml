@@ -1,10 +1,11 @@
 http:
   port: "8081"
+  path: "users"
 db:
   mySql:
     host: "localhost"
     user: "root"
-    password: "root"
+    password: "![KDJFnCGOFqU=]"
     port: "3306"
   oracle:
     host: "localhost"
