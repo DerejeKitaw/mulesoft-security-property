@@ -1,0 +1,7 @@
+http:
+  port: "8082"
+db:
+  host: "localhost"
+  user: "root"
+  password: "root"
+  port: "3306"
